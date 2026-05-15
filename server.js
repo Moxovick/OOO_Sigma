@@ -12,8 +12,11 @@ try {
   if (process.env.SUPABASE_URL && sbKey) {
     const { createClient } = require('@supabase/supabase-js');
     supabase = createClient(process.env.SUPABASE_URL, sbKey);
+    console.log('[supabase] client initialized, URL:', process.env.SUPABASE_URL.slice(0, 40));
+  } else {
+    console.warn('[supabase] NOT initialized — SUPABASE_URL:', !!process.env.SUPABASE_URL, 'key:', !!sbKey);
   }
-} catch(_) {}
+} catch(e) { console.error('[supabase] init error:', e.message); }
 
 let jwt = null;
 try { jwt = require('jsonwebtoken'); } catch(_) {}
@@ -375,9 +378,12 @@ async function loadConfig() {
 
 async function saveConfig(cfg) {
   if (supabase) {
-    await supabase.from('site_config').upsert({ id: 1, data: cfg });
+    const { error } = await supabase.from('site_config').upsert({ id: 1, data: cfg });
+    if (error) throw new Error('Supabase saveConfig: ' + error.message);
     return;
   }
+  // Vercel filesystem is read-only — if no supabase, config cannot be persisted
+  if (process.env.VERCEL) throw new Error('No Supabase configured — cannot save on Vercel');
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
 }
 
@@ -595,6 +601,7 @@ app.post('/admin/save', async (req, res) => {
     await saveConfig(cfg);
     res.json({ ok: true });
   } catch (err) {
+    console.error('[admin/save] error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
