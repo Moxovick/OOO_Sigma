@@ -364,14 +364,31 @@ const SLIDER_NAV_CSS = `<style id="sigmaSliderNav">
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
+function baseConfig() {
+  return {
+    phones: {
+      main:   { display: '8 (495) 937-60-00', href: '+74959376000' },
+      free:   { display: '8 (800) 550-39-55', href: '+78005503961' },
+      spb:    { display: '+7 (812) 317-74-26', href: '+78123177426' },
+      mobile: { display: '+7 (903) 967-51-63', href: '+79039675163' },
+    },
+    emails:  { info: 'info@sigma-profi.org', client: 'client@sigma-profi.org', kadr: 'kadr@sigma-profi.org', tender: 'tender@sigma-profi.org' },
+    address: { full: 'г. Москва, Огородный проезд, д. 20, стр. 27, 5 этаж', index: '127322', legal: '' },
+    company: { name: 'Группа компаний «Сигма-Профи»', legal_name: 'ООО ЧОП «СИГМА-ПРОФИ»', inn: '7707293185', kpp: '771601001', ogrn: '1037739060666', director: 'Машуров Г.Н.', bank_name: 'ПАО Сбербанк России г. Москва', rs: '40702810738040020050', ks: '30101810400000000225', bik: '044525225', legal_address: '129347, г. Москва, ул. Холмогорская, д.6, корп.2, стр.2' },
+  };
+}
+
 function defaultConfig() {
-  try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); } catch { return {}; }
+  try {
+    const file = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    return Object.assign(baseConfig(), file);
+  } catch { return baseConfig(); }
 }
 
 async function loadConfig() {
   if (supabase) {
     const { data } = await supabase.from('site_config').select('data').eq('id', 1).single();
-    return data?.data || defaultConfig();
+    if (data?.data) return Object.assign(baseConfig(), data.data);
   }
   return defaultConfig();
 }
