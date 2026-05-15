@@ -717,7 +717,7 @@ app.get('/wp-json/contact-form-7/v1/contact-forms/:id/refill', (req, res) => {
 app.post(
   '/wp-json/contact-form-7/v1/contact-forms/:id/feedback',
   upload.any(),
-  (req, res) => {
+  async (req, res) => {
     const body   = req.body || {};
     const files  = req.files || [];
     const formId = req.params.id;
@@ -789,7 +789,7 @@ app.post('/wp-admin/post.php', (req, res) => {
 
 // ─── form submission interceptor ─────────────────────────────────────────────
 // Catches all POST requests that look like contact / CF7 form submissions
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   if (req.method !== 'POST') return next();
   const body = req.body;
   if (!body) return next();
