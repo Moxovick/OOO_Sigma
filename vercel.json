@@ -1,9 +1,22 @@
 {
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "{templates/**,config.json}"
+  "version": 2,
+  "builds": [
+    {
+      "src": "wp-content/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "wp-includes/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["templates/**", "config.json"]
+      }
     }
-  },
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index.js" }
   ],
