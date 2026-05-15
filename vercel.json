@@ -1,56 +1,21 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.js", "use": "@vercel/node" }
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["public/**", "config.json"]
+      }
+    }
   ],
-  "routes": [
-    { "src": "/wp-content/uploads/(.*)", "dest": "/public/wp-content/uploads/$1",
-      "headers": { "cache-control": "public, max-age=86400, immutable" } },
-    { "src": "/wp-content/plugins/(.*)", "dest": "/public/wp-content/plugins/$1",
-      "headers": { "cache-control": "public, max-age=86400" } },
-    { "src": "/wp-content/themes/(.*)",  "dest": "/public/wp-content/themes/$1",
-      "headers": { "cache-control": "public, max-age=86400" } },
-    { "src": "/(.*\\.(?:css|js|woff2?|ttf|eot|ico|svg|png|jpe?g|gif|webp))", "dest": "/public/$1",
-      "headers": { "cache-control": "public, max-age=86400" } },
-    { "src": "/(.*)", "dest": "/api/index.js",
-      "headers": { "cache-control": "no-store" } }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index.js" }
   ],
   "redirects": [
     { "source": "/en",  "destination": "/", "permanent": true },
     { "source": "/en/", "destination": "/", "permanent": true },
     { "source": "/zh",  "destination": "/", "permanent": true },
-    { "source": "/zh/", "destination": "/", "permanent": true },
-    { "source": "/novosti/25-let-gk-sigma-profi",                                "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/25-let-gk-sigma-profi/",                               "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/8-march-2025",                                          "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/8-march-2025/",                                         "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/biznes-tsentr-botanica-pod-okhranoy-sigma-profi",       "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/biznes-tsentr-botanica-pod-okhranoy-sigma-profi/",      "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/four-seasons-hotel-moscow-pod-okhranoj-gk-sigma-profi", "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/four-seasons-hotel-moscow-pod-okhranoj-gk-sigma-profi/","destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/gk-sigma-profi-24-goda",                                "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/gk-sigma-profi-24-goda/",                               "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/gonka-geroev-2024-komanda-sigma-profi",                 "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/gonka-geroev-2024-komanda-sigma-profi/",                "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/gonka-geroev-2024-video",                               "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/gonka-geroev-2024-video/",                              "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/gruppe-kompaniy-sigma-profi-23",                        "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/gruppe-kompaniy-sigma-profi-23/",                       "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/ludi-v-chernom-sorevnovaniya-2024",                     "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/ludi-v-chernom-sorevnovaniya-2024/",                    "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/olimpiyskie-objekti-pod-okhranoy-gk-sigma-profi",       "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/olimpiyskie-objekti-pod-okhranoy-gk-sigma-profi/",      "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/pozdravlyaem-s-8-marta",                                "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/pozdravlyaem-s-8-marta/",                               "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/s-novim-godom-2025",                                    "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/s-novim-godom-2025/",                                   "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/sigma-profi-lider-reitinga-chop-2025",                  "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/sigma-profi-lider-reitinga-chop-2025/",                 "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/teatr-na-strastnom-pod-okhranoy-gk-sigma-profi",        "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/teatr-na-strastnom-pod-okhranoy-gk-sigma-profi/",       "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/trc-botanica-pod-okhranoy-gk-sigma-profi",              "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/trc-botanica-pod-okhranoy-gk-sigma-profi/",             "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/zk-prime-park-pod-okhranoy-gk-sigma-profi",             "destination": "/novosti/", "permanent": true },
-    { "source": "/novosti/zk-prime-park-pod-okhranoy-gk-sigma-profi/",            "destination": "/novosti/", "permanent": true }
+    { "source": "/zh/", "destination": "/", "permanent": true }
   ]
 }
