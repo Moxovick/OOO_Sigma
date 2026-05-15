@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/index.js": {
-      "includeFiles": "{public/**,config.json}"
+      "includeFiles": "{templates/**,config.json}"
     }
   },
   "rewrites": [

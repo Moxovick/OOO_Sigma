@@ -22,9 +22,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'local-dev-secret-change-me';
 
 const app         = express();
 const PORT        = process.env.PORT || 3000;
-const PUBLIC_DIR  = path.join(__dirname, 'public');
-const WP_CONTENT_DIR  = path.join(__dirname, 'wp-content');
-const WP_INCLUDES_DIR = path.join(__dirname, 'wp-includes');
+const PUBLIC_DIR  = path.join(__dirname, 'templates');   // HTML pages
+const WP_CONTENT_DIR  = path.join(__dirname, 'public', 'wp-content');
+const WP_INCLUDES_DIR = path.join(__dirname, 'public', 'wp-includes');
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const SUBMISSIONS_PATH = path.join(__dirname, 'submissions.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Sigma@Admin2026';
