@@ -23,6 +23,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'local-dev-secret-change-me';
 const app         = express();
 const PORT        = process.env.PORT || 3000;
 const PUBLIC_DIR  = path.join(__dirname, 'public');
+const WP_CONTENT_DIR  = path.join(__dirname, 'wp-content');
+const WP_INCLUDES_DIR = path.join(__dirname, 'wp-includes');
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const SUBMISSIONS_PATH = path.join(__dirname, 'submissions.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Sigma@Admin2026';
@@ -1082,7 +1084,9 @@ app.use(async (req, res, next) => {
   });
 });
 
-// Static assets
+// Static assets (wp-content / wp-includes live at project root, not inside public/)
+app.use('/wp-content', express.static(WP_CONTENT_DIR));
+app.use('/wp-includes', express.static(WP_INCLUDES_DIR));
 app.use(express.static(PUBLIC_DIR));
 
 // ─── uploads image fallback ───────────────────────────────────────────────────
@@ -1090,7 +1094,7 @@ app.use('/wp-content/uploads', (req, res, next) => {
   const ext = path.extname(req.path).toLowerCase();
   if (!['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) return next();
 
-  const fullPath = path.join(PUBLIC_DIR, 'wp-content/uploads', decodeURIComponent(req.path));
+  const fullPath = path.join(WP_CONTENT_DIR, 'uploads', decodeURIComponent(req.path));
   if (fs.existsSync(fullPath)) return next();
 
   const dir  = path.dirname(fullPath);
