@@ -8,9 +8,10 @@ const zlib    = require('zlib');
 // ─── Supabase + JWT (Vercel env) ──────────────────────────────────────────────
 let supabase = null;
 try {
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+  const sbKey = process.env.SUPABASE_SECRET || process.env.SUPABASE_SERVICE_KEY;
+  if (process.env.SUPABASE_URL && sbKey) {
     const { createClient } = require('@supabase/supabase-js');
-    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+    supabase = createClient(process.env.SUPABASE_URL, sbKey);
   }
 } catch(_) {}
 
