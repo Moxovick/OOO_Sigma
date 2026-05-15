@@ -5,12 +5,26 @@ const crypto  = require('crypto');
 const multer  = require('multer');
 const zlib    = require('zlib');
 
+// ─── Supabase + JWT (Vercel env) ──────────────────────────────────────────────
+let supabase = null;
+try {
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+    const { createClient } = require('@supabase/supabase-js');
+    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+  }
+} catch(_) {}
+
+let jwt = null;
+try { jwt = require('jsonwebtoken'); } catch(_) {}
+
+const JWT_SECRET = process.env.JWT_SECRET || 'local-dev-secret-change-me';
+
 const app         = express();
-const PORT        = 3000;
+const PORT        = process.env.PORT || 3000;
 const PUBLIC_DIR  = path.join(__dirname, 'public');
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const SUBMISSIONS_PATH = path.join(__dirname, 'submissions.json');
-const ADMIN_PASSWORD = 'Sigma@Admin2026';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Sigma@Admin2026';
 
 // ─── Cyrillic → Latin transliteration (for vakansii URLs) ────────────────────
 const TRANSLIT_MAP = {
@@ -341,19 +355,52 @@ const SLIDER_NAV_CSS = `<style id="sigmaSliderNav">
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
-function loadConfig() {
-  return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+function defaultConfig() {
+  try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); } catch { return {}; }
 }
-function saveConfig(cfg) {
+
+async function loadConfig() {
+  if (supabase) {
+    const { data } = await supabase.from('site_config').select('data').eq('id', 1).single();
+    return data?.data || defaultConfig();
+  }
+  return defaultConfig();
+}
+
+async function saveConfig(cfg) {
+  if (supabase) {
+    await supabase.from('site_config').upsert({ id: 1, data: cfg });
+    return;
+  }
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
 }
-function loadSubmissions() {
+
+async function loadSubmissions() {
+  if (supabase) {
+    const { data } = await supabase.from('submissions')
+      .select('*').order('created_at', { ascending: false });
+    return (data || []).map(r => ({
+      id: r.id, time: r.created_at, page: r.page,
+      name: r.name, phone: r.phone, email: r.email,
+      subject: r.subject, message: r.message, raw: r.raw || {}
+    }));
+  }
   if (!fs.existsSync(SUBMISSIONS_PATH)) return [];
   try { return JSON.parse(fs.readFileSync(SUBMISSIONS_PATH, 'utf8')); } catch { return []; }
 }
-function saveSubmission(entry) {
-  const list = loadSubmissions();
-  list.unshift(entry);  // newest first
+
+async function saveSubmission(entry) {
+  if (supabase) {
+    await supabase.from('submissions').insert({
+      id: entry.id, created_at: new Date(entry.time).toISOString(),
+      page: entry.page, name: entry.name, phone: entry.phone,
+      email: entry.email, subject: entry.subject, message: entry.message,
+      raw: entry.raw || {}
+    });
+    return;
+  }
+  const list = await loadSubmissions();
+  list.unshift(entry);
   fs.writeFileSync(SUBMISSIONS_PATH, JSON.stringify(list, null, 2), 'utf8');
 }
 
@@ -433,12 +480,23 @@ function fixRootRedirect(html) {
   return html.replace(/<META HTTP-EQUIV="Refresh" CONTENT="0; URL=en\/index\.html">/i, '');
 }
 
-// ─── session auth ─────────────────────────────────────────────────────────────
-const sessions = new Set();
-function generateToken() { return crypto.randomBytes(24).toString('hex'); }
+// ─── session auth (JWT on Vercel, in-memory locally) ─────────────────────────
+const sessions = new Set(); // used only when jwt module unavailable
+
+function generateToken() {
+  if (jwt) return jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '7d' });
+  const t = crypto.randomBytes(24).toString('hex');
+  sessions.add(t);
+  return t;
+}
+
 function isAuthenticated(req) {
   const token = req.cookies && req.cookies['admin_token'];
-  return token && sessions.has(token);
+  if (!token) return false;
+  if (jwt) {
+    try { jwt.verify(token, JWT_SECRET); return true; } catch { return false; }
+  }
+  return sessions.has(token);
 }
 
 // ─── multer (multipart/form-data for file uploads) ────────────────────────────
@@ -475,7 +533,6 @@ app.get('/admin/login', (req, res) => {
 app.post('/admin/login', (req, res) => {
   if (req.body.password === ADMIN_PASSWORD) {
     const token = generateToken();
-    sessions.add(token);
     res.setHeader('Set-Cookie', `admin_token=${token}; Path=/; HttpOnly; SameSite=Strict`);
     return res.redirect('/admin');
   }
@@ -483,20 +540,20 @@ app.post('/admin/login', (req, res) => {
 });
 app.get('/admin/logout', (req, res) => {
   const token = req.cookies['admin_token'];
-  if (token) sessions.delete(token);
+  if (token && !jwt) sessions.delete(token);
   res.setHeader('Set-Cookie', 'admin_token=; Path=/; Max-Age=0');
   res.redirect('/admin/login');
 });
-app.get('/admin', (req, res) => {
+app.get('/admin', async (req, res) => {
   if (!isAuthenticated(req)) return res.redirect('/admin/login');
-  const cfg  = loadConfig();
-  const subs = loadSubmissions();
+  const cfg  = await loadConfig();
+  const subs = await loadSubmissions();
   res.send(adminPage(cfg, subs));
 });
-app.post('/admin/save', (req, res) => {
+app.post('/admin/save', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const cfg = loadConfig();
+    const cfg = await loadConfig();
     const b   = req.body;
 
     // phones
@@ -541,7 +598,7 @@ app.post('/admin/save', (req, res) => {
     cfg.company.bik          = b.company_bik          !== undefined ? b.company_bik : cfg.company.bik;
     cfg.company.legal_address = b.company_legal_address || cfg.company.legal_address;
 
-    saveConfig(cfg);
+    await saveConfig(cfg);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -549,11 +606,15 @@ app.post('/admin/save', (req, res) => {
 });
 
 // Delete a submission
-app.post('/admin/submissions/delete', (req, res) => {
+app.post('/admin/submissions/delete', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Unauthorized' });
-  const id   = req.body.id;
-  const list = loadSubmissions().filter(s => s.id !== id);
-  fs.writeFileSync(SUBMISSIONS_PATH, JSON.stringify(list, null, 2), 'utf8');
+  const id = req.body.id;
+  if (supabase) {
+    await supabase.from('submissions').delete().eq('id', id);
+  } else {
+    const list = (await loadSubmissions()).filter(s => s.id !== id);
+    fs.writeFileSync(SUBMISSIONS_PATH, JSON.stringify(list, null, 2), 'utf8');
+  }
   res.json({ ok: true });
 });
 
@@ -562,46 +623,61 @@ const EDITABLE_PAGES = {
   'dostavka-dokumentov': path.join(PUBLIC_DIR, 'uslugi/dostavka-dokumentov/index.html'),
 };
 
-function getPageContent(pageKey) {
+async function getPageContent(pageKey) {
+  if (supabase) {
+    const { data } = await supabase.from('page_content')
+      .select('html').eq('page_key', pageKey).single();
+    // If Supabase has content use it; otherwise fall through to file
+    if (data?.html) return data.html;
+  }
   const filePath = EDITABLE_PAGES[pageKey];
   if (!filePath) return null;
-  const html = fs.readFileSync(filePath, 'utf8');
-  const startTag = `<!-- SIGMA-EDITABLE-START: ${pageKey} -->`;
-  const endTag   = `<!-- SIGMA-EDITABLE-END: ${pageKey} -->`;
-  const s = html.indexOf(startTag);
-  const e = html.indexOf(endTag);
-  if (s === -1 || e === -1) return null;
-  return html.slice(s + startTag.length, e).trim();
+  try {
+    const html = fs.readFileSync(filePath, 'utf8');
+    const startTag = `<!-- SIGMA-EDITABLE-START: ${pageKey} -->`;
+    const endTag   = `<!-- SIGMA-EDITABLE-END: ${pageKey} -->`;
+    const s = html.indexOf(startTag);
+    const e = html.indexOf(endTag);
+    if (s === -1 || e === -1) return null;
+    return html.slice(s + startTag.length, e).trim();
+  } catch { return null; }
 }
 
-function savePageContent(pageKey, newContent) {
+async function savePageContent(pageKey, newContent) {
+  if (supabase) {
+    const { error } = await supabase.from('page_content')
+      .upsert({ page_key: pageKey, html: newContent, updated_at: new Date().toISOString() });
+    return !error;
+  }
   const filePath = EDITABLE_PAGES[pageKey];
   if (!filePath) return false;
-  let html = fs.readFileSync(filePath, 'utf8');
-  const startTag = `<!-- SIGMA-EDITABLE-START: ${pageKey} -->`;
-  const endTag   = `<!-- SIGMA-EDITABLE-END: ${pageKey} -->`;
-  const s = html.indexOf(startTag);
-  const e = html.indexOf(endTag);
-  if (s === -1 || e === -1) return false;
-  html = html.slice(0, s + startTag.length) + '\n' + newContent + '\n' + html.slice(e);
-  fs.writeFileSync(filePath, html, 'utf8');
-  return true;
+  try {
+    let html = fs.readFileSync(filePath, 'utf8');
+    const startTag = `<!-- SIGMA-EDITABLE-START: ${pageKey} -->`;
+    const endTag   = `<!-- SIGMA-EDITABLE-END: ${pageKey} -->`;
+    const s = html.indexOf(startTag);
+    const e = html.indexOf(endTag);
+    if (s === -1 || e === -1) return false;
+    html = html.slice(0, s + startTag.length) + '\n' + newContent + '\n' + html.slice(e);
+    fs.writeFileSync(filePath, html, 'utf8');
+    return true;
+  } catch { return false; }
 }
 
-app.get('/admin/page-content', (req, res) => {
+app.get('/admin/page-content', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Unauthorized' });
   const pageKey = req.query.page;
-  const content = getPageContent(pageKey);
+  const content = await getPageContent(pageKey);
   if (content === null) return res.status(404).json({ error: 'Page not found' });
   res.json({ ok: true, content });
 });
 
-app.post('/admin/page-content/save', (req, res) => {
+app.post('/admin/page-content/save', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Unauthorized' });
   const pageKey  = req.body.page;
   const content  = req.body.content;
   if (!pageKey || content === undefined) return res.status(400).json({ error: 'Missing params' });
-  const ok = savePageContent(pageKey, content);
+  const ok = await savePageContent(pageKey, content);
   if (!ok) return res.status(404).json({ error: 'Page not found or markers missing' });
   res.json({ ok: true });
 });
@@ -674,7 +750,7 @@ app.post(
       message: msg,
       raw,
     };
-    saveSubmission(entry);
+    await saveSubmission(entry);
 
     // Return CF7-compatible JSON response so the JS shows "sent" state
     res.json({
@@ -743,7 +819,7 @@ app.use((req, res, next) => {
       Object.entries(body).filter(([k]) => !k.startsWith('_wpcf7') && !k.startsWith('g-recaptcha'))
     ),
   };
-  saveSubmission(entry);
+  await saveSubmission(entry);
   // Redirect back to the referring page with success flag
   const referer = req.get('Referer') || '/';
   const sep     = referer.includes('?') ? '&' : '?';
@@ -782,7 +858,7 @@ app.use((req, res, next) => {
 });
 
 // ─── HTML serving ─────────────────────────────────────────────────────────────
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   const urlPath = decodeURIComponent(req.path);
   let filePath  = path.join(PUBLIC_DIR, urlPath);
 
@@ -794,8 +870,10 @@ app.use((req, res, next) => {
 
   if (!filePath.endsWith('.html')) return next();
 
+  const resolvedPath = filePath; // capture for EDITABLE_PAGES lookup inside callback
+
   // Read as binary buffer first so we can handle gzip-compressed files
-  fs.readFile(filePath, (err, rawBuf) => {
+  fs.readFile(filePath, async (err, rawBuf) => {
     let html = '';
     if (!err && rawBuf) {
       // Detect gzip magic bytes (1f 8b)
@@ -826,8 +904,25 @@ app.use((req, res, next) => {
       return res.redirect(302, '/novosti/?article_missing=1');
     }
 
-    const cfg = loadConfig();
+    const cfg = await loadConfig();
     html = applyConfig(html, cfg);
+
+    // Inject Supabase page content if available
+    for (const [pageKey, filePath] of Object.entries(EDITABLE_PAGES)) {
+      if (filePath === resolvedPath) {
+        const content = await getPageContent(pageKey);
+        if (content) {
+          const startTag = `<!-- SIGMA-EDITABLE-START: ${pageKey} -->`;
+          const endTag   = `<!-- SIGMA-EDITABLE-END: ${pageKey} -->`;
+          const s = html.indexOf(startTag);
+          const e = html.indexOf(endTag);
+          if (s !== -1 && e !== -1) {
+            html = html.slice(0, s + startTag.length) + '\n' + content + '\n' + html.slice(e);
+          }
+        }
+        break;
+      }
+    }
 
     if (urlPath.startsWith('/dogovor-oferty')) {
       html = applyDogovorData(html, cfg);
@@ -1459,10 +1554,14 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ─── start ────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n  Sigma-Profi сайт запущен:`);
-  console.log(`  🌐  http://localhost:${PORT}`);
-  console.log(`  ⚙️   http://localhost:${PORT}/admin`);
-  console.log(`  🔑  Пароль: ${ADMIN_PASSWORD}\n`);
-});
+// ─── start (local only — on Vercel api/index.js exports the app) ─────────────
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n  Sigma-Profi сайт запущен:`);
+    console.log(`  🌐  http://localhost:${PORT}`);
+    console.log(`  ⚙️   http://localhost:${PORT}/admin`);
+    console.log(`  🔑  Пароль: ${ADMIN_PASSWORD}\n`);
+  });
+}
+
+module.exports = app;
