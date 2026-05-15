@@ -13,7 +13,8 @@
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["templates/**", "config.json"]
+        "includeFiles": ["templates/**", "config.json"],
+        "excludeFiles": ["wp-content/**", "wp-includes/**"]
       }
     }
   ],
