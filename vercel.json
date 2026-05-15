@@ -2,14 +2,63 @@
   "version": 2,
   "builds": [
     {
+      "src": "public/wp-content/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "public/wp-includes/**",
+      "use": "@vercel/static"
+    },
+    {
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["public/**", "config.json"]
+        "includeFiles": [
+          "public/index.html",
+          "public/xmlrpc0db0.html",
+          "public/2021/**",
+          "public/2024/**",
+          "public/2025/**",
+          "public/2026/**",
+          "public/3d/**",
+          "public/ammunition/**",
+          "public/arenda-avtomobilya/**",
+          "public/carstest/**",
+          "public/catvak/**",
+          "public/comments/**",
+          "public/dogovor-oferty/**",
+          "public/faq/**",
+          "public/feed/**",
+          "public/forma-odezhdy/**",
+          "public/foto/**",
+          "public/grafik/**",
+          "public/kontakty/**",
+          "public/lizenziya/**",
+          "public/nashi-klienty/**",
+          "public/nashi-partnery/**",
+          "public/novosti/**",
+          "public/o-kompanii/**",
+          "public/ohrannikam/**",
+          "public/partner/**",
+          "public/plusimg/**",
+          "public/podgotovka-sotrudnikov/**",
+          "public/privacy-policy/**",
+          "public/stati/**",
+          "public/stt/**",
+          "public/uslugi/**",
+          "public/vakansii/**",
+          "public/wp-admin/**",
+          "public/wp-json/**",
+          "public/zakon/**",
+          "public/zakupki/**",
+          "config.json"
+        ]
       }
     }
   ],
   "rewrites": [
+    { "source": "/wp-content/:path*", "destination": "/public/wp-content/:path*" },
+    { "source": "/wp-includes/:path*", "destination": "/public/wp-includes/:path*" },
     { "source": "/(.*)", "destination": "/api/index.js" }
   ],
   "redirects": [
