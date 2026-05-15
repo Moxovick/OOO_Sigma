@@ -447,13 +447,9 @@ function applyConfig(html, cfg) {
     [/г\. Москва, Огородный проезд, д\. 20, стр\. 27, 5 этаж/g,           a.full || ''],
     [/г\. Москва, Огородный проезд, д\. 20, стр\. 27, 5-й этаж/g,         a.full || ''],
     [/127322, г\. Москва, Огородный проезд, д\. 20, стр\. 27, 5-й этаж/g, a.index ? `${a.index}, ${a.full}` : ''],
-    // ── social ───────────────────────────────────────────────────────────────
-    [/href="https:\/\/vk\.com\/sigmaprofi"/g,
-      `href="${s.vk || 'https://vk.com/sigmaprofi'}"`],
-    [/href="https:\/\/www\.youtube\.com\/user\/PSCSIGMAPROFI\/"/g,
-      `href="${s.youtube || 'https://www.youtube.com/user/PSCSIGMAPROFI/'}"`],
-    [/href="https:\/\/www\.instagram\.com\/sigmaprofi\/"/g,
-      `href="${s.instagram || 'https://www.instagram.com/sigmaprofi/'}"`],
+    // ── social (removed — strip all social media icons from pages) ──────────
+    [/<li>\s*<a[^>]*(?:vk\.com|youtube\.com|instagram\.com|facebook\.com|twitter\.com|telegram\.me|t\.me|odnoklassniki\.ru|ok\.ru)[^>]*>[\s\S]*?<\/a>\s*<\/li>/gi, ''],
+    [/<li>\s*<a[^>]*class="[^"]*instagram[^"]*"[^>]*>[\s\S]*?<\/a>\s*<\/li>/gi, ''],
   ];
 
   for (const [pattern, replacement] of replacements) {
@@ -577,14 +573,6 @@ app.post('/admin/save', async (req, res) => {
     cfg.emails.client  = b.email_client  || cfg.emails.client;
     cfg.emails.kadr    = b.email_kadr    || cfg.emails.kadr;
     cfg.emails.tender  = b.email_tender  || cfg.emails.tender;
-
-    // social
-    cfg.social         = cfg.social || {};
-    cfg.social.vk        = b.social_vk        !== undefined ? b.social_vk        : cfg.social.vk;
-    cfg.social.youtube   = b.social_youtube   !== undefined ? b.social_youtube   : cfg.social.youtube;
-    cfg.social.instagram = b.social_instagram !== undefined ? b.social_instagram : cfg.social.instagram;
-    cfg.social.telegram  = b.social_telegram  !== undefined ? b.social_telegram  : cfg.social.telegram;
-    cfg.social.facebook  = b.social_facebook  !== undefined ? b.social_facebook  : cfg.social.facebook;
 
     // address
     cfg.address.full   = b.address_full  || cfg.address.full;
@@ -1314,23 +1302,6 @@ section h2{font-size:12px;font-weight:600;padding:14px 20px;border-bottom:1px so
         <div class="row">
           <div class="field"><label>Кадры (kadr)</label><input name="email_kadr" value="${esc(e.kadr)}" type="email"></div>
           <div class="field"><label>Тендеры (tender)</label><input name="email_tender" value="${esc(e.tender)}" type="email"></div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <h2>🌐 Социальные сети</h2>
-      <div class="fields">
-        <div class="row">
-          <div class="field"><label>ВКонтакте</label><input name="social_vk" value="${esc(s.vk||'')}"></div>
-          <div class="field"><label>YouTube</label><input name="social_youtube" value="${esc(s.youtube||'')}"></div>
-        </div>
-        <div class="row">
-          <div class="field"><label>Instagram</label><input name="social_instagram" value="${esc(s.instagram||'')}"></div>
-          <div class="field"><label>Telegram</label><input name="social_telegram" value="${esc(s.telegram||'')}"></div>
-        </div>
-        <div class="row">
-          <div class="field"><label>Facebook</label><input name="social_facebook" value="${esc(s.facebook||'')}"></div>
         </div>
       </div>
     </section>
