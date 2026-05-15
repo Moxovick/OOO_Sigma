@@ -1,0 +1,78 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/wp-content/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, immutable" }
+      ]
+    }
+  ],
+  "redirects": [
+    { "source": "/en",  "destination": "/", "permanent": true },
+    { "source": "/en/", "destination": "/", "permanent": true },
+    { "source": "/zh",  "destination": "/", "permanent": true },
+    { "source": "/zh/", "destination": "/", "permanent": true },
+    { "source": "/novosti/25-let-gk-sigma-profi",                               "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/25-let-gk-sigma-profi/",                              "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/8-march-2025",                                         "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/8-march-2025/",                                        "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/biznes-tsentr-botanica-pod-okhranoy-sigma-profi",      "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/biznes-tsentr-botanica-pod-okhranoy-sigma-profi/",     "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/four-seasons-hotel-moscow-pod-okhranoj-gk-sigma-profi","destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/four-seasons-hotel-moscow-pod-okhranoj-gk-sigma-profi/","destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/gk-sigma-profi-24-goda",                               "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/gk-sigma-profi-24-goda/",                              "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/gonka-geroev-2024-komanda-sigma-profi",                "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/gonka-geroev-2024-komanda-sigma-profi/",               "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/gonka-geroev-2024-video",                              "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/gonka-geroev-2024-video/",                             "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/gruppe-kompaniy-sigma-profi-23",                       "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/gruppe-kompaniy-sigma-profi-23/",                      "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/ludi-v-chernom-sorevnovaniya-2024",                    "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/ludi-v-chernom-sorevnovaniya-2024/",                   "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/olimpiyskie-objekti-pod-okhranoy-gk-sigma-profi",      "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/olimpiyskie-objekti-pod-okhranoy-gk-sigma-profi/",     "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-8-marta",                               "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-8-marta/",                              "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-8-marta-2",                             "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-8-marta-2/",                            "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-9-maya",                                "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-9-maya/",                               "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-dnem-pobedy",                           "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-dnem-pobedy/",                          "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-dnem-pobedy-2025",                      "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-dnem-pobedy-2025/",                     "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-dnem-rossii-2025",                      "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/pozdravlyaem-s-dnem-rossii-2025/",                     "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/s-dnem-rossii",                                         "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/s-dnem-rossii/",                                        "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/s-dnem-zashitnika-otechestva",                         "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/s-dnem-zashitnika-otechestva/",                        "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/s-novim-godom-2025",                                    "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/s-novim-godom-2025/",                                   "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/sigma-profi-lider-reitinga-chop-2025",                  "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/sigma-profi-lider-reitinga-chop-2025/",                 "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/sigma-profi-lider-reytinga-chop-2024",                  "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/sigma-profi-lider-reytinga-chop-2024/",                 "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/teatr-na-strastnom-pod-okhranoy-gk-sigma-profi",        "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/teatr-na-strastnom-pod-okhranoy-gk-sigma-profi/",       "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/trc-botanica-pod-okhranoy-gk-sigma-profi",              "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/trc-botanica-pod-okhranoy-gk-sigma-profi/",             "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/ucheniya-sotrudnikov-gk-sigma-profi-v-objecte-v-skolkovo","destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/ucheniya-sotrudnikov-gk-sigma-profi-v-objecte-v-skolkovo/","destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/videorolik-so-sborov-telohranitelej",                   "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/videorolik-so-sborov-telohranitelej/",                  "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/vsemirniy-molodezhi-i-studentov-2024",                  "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/vsemirniy-molodezhi-i-studentov-2024/",                 "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/zk-prime-park-pod-okhranoy-gk-sigma-profi",             "destination": "/novosti/", "permanent": true },
+    { "source": "/novosti/zk-prime-park-pod-okhranoy-gk-sigma-profi/",            "destination": "/novosti/", "permanent": true }
+  ]
+}

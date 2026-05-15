@@ -1,0 +1,39 @@
+.hotspot-body{
+	background-color:#ededed;
+	width:100%;
+	overflow:hidden;
+}
+h1.hotspot{
+	font-family: 'AllerLightRegular';
+	font-size:21px;
+	color:#000000;
+	text-align:left;
+}
+h2.hotspot{
+	font-family: 'AllerLightRegular';
+	font-size:13px;
+	color:#000000;
+	text-align:left;
+}
+p.hotspot{
+	font-family: 'AllerLightRegular';
+	font-size:12px;
+	color:#000000;
+	text-align:justify;
+}
+.col1 {
+    float:left;
+    width:45%;
+}
+.col2 {
+    float:left;
+    width:45%;
+    padding:0 10px;
+    margin-left:25px;
+}
+.hotspot-wraper{	
+	position:relative;
+	float:left;	
+	padding:10px 30px;
+	overflow:hidden;
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" style="width: 460px;height: 735px;margin: auto;background: #2d2d2d;">
+	
+
+
+<head> 
+		<link href="main.css" rel="stylesheet" type="text/css" />
+		<link href="hotspot-pages.css" rel="stylesheet" type="text/css" />
+		<link href="css/fonts.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="js/libraries/jquery.js"></script>
+		<script type="text/javascript" src="js/libraries/jquery.mobile.vmouse.js"></script> 
+		<script type="text/javascript" src="js/libraries/jquery.mousewheel.min.js"></script> 
+		<script type="text/javascript" src="js/pngFixer.js"></script>
+		<script type="text/javascript" src="js/buttons.js"></script>
+		<script type="text/javascript" src="js/uncompressed/Expo360.js"></script>
+		<script type="text/javascript">
+			jQuery(document).ready(function($) {
+				var expo = new Expo360({xml:"configuration/5.xml", where:"#viewer"});
+				
+				$("#goFront").click(function(){
+					expo.goTo(0);
+					return false;
+				});
+			});
+		</script>
+		<meta name="viewport" content="width=470">
+     <style id="local-font-stack">
+body,h1,h2,h3,h4,h5,h6,p,a,span,div,li,td,th,button,input,textarea,select{
+  font-family:'Segoe UI',Arial,sans-serif;
+}
+</style>
+</head>  
+	<body style="width: 460px;height: 735px;display:inline-block;background: #2d2d2d;">
+        <div id="viewer" style="position:relative;overflow:hidden;width: 450px;height: 725px;display:inline-block;"></div>
+	</body>
+
+
+</html>
