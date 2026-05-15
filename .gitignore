@@ -1,5 +1,6 @@
 node_modules/
-uploads/
+# Ignore local form uploads folder, but NOT wp-content/uploads (media library)
+/uploads/
 submissions.json
 *.log
 .env
