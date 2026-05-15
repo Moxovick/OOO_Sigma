@@ -1086,6 +1086,15 @@ app.use(async (req, res, next) => {
 </script>\n</body>`);
     }
 
+    // ── Inject "Частные инкассации" into nav after "Доставка документов" ─────
+    // Works on all pages regardless of relative path variations in href
+    if (html.includes('menu-item-282') && !html.includes('Частные инкассации')) {
+      html = html.replace(
+        /(<li[^>]*menu-item-282[^>]*>[\s\S]*?Доставка документов[\s\S]*?<\/li>)/,
+        '$1\n\t<li class="menu-item menu-item-type-post_type menu-item-object-page"><a title="Частные инкассации" href="/uslugi/dostavka-dokumentov/">Частные инкассации</a></li>'
+      );
+    }
+
     // ── Rewrite absolute sigma-profi.org URLs to relative paths ─────────────
     // HTTrack sometimes saves pages with full URLs. Replace https://sigma-profi.org/
     // with / so all links, images, and scripts resolve locally.
